@@ -70,7 +70,7 @@ public abstract class ShaderProgram {
         GL20.glUniform3f(location, value.x, value.y, value.z);
     }
 
-    protected void loodBool(int location, boolean value) {
+    protected void loadBool(int location, boolean value) {
         float toLoad = 0;
         if(value)
             toLoad = 1;
