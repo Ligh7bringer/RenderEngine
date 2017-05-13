@@ -4,6 +4,7 @@ import com.sun.prism.ps.Shader;
 import entities.Camera;
 import entities.Light;
 import org.lwjgl.util.vector.Matrix4f;
+import org.lwjgl.util.vector.Vector3f;
 import utils.Maths;
 
 /**
@@ -20,6 +21,7 @@ public class TerrainShader extends ShaderProgram {
     private int location_lightColour;
     private int location_shineDamper;
     private int location_reflect;
+    private int location_skyColour;
 
     public TerrainShader() {
         super(VERTEX_FILE, FRAGMENT_FILE);
@@ -41,6 +43,11 @@ public class TerrainShader extends ShaderProgram {
         location_lightColour = super.getUniformLocation("lightColour");
         location_shineDamper = super.getUniformLocation("shineDamper");
         location_reflect = super.getUniformLocation("reflectivity");
+        location_skyColour = super.getUniformLocation("skyColour");
+    }
+
+    public void loadSkyColour(Vector3f value) {
+        super.loadVector(location_skyColour, value);
     }
 
     public void loadShineVars(float damper, float reflect) {

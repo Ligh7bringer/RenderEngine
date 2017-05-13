@@ -3,6 +3,7 @@ package shaders;
 import entities.Camera;
 import entities.Light;
 import org.lwjgl.util.vector.Matrix4f;
+import org.lwjgl.util.vector.Vector3f;
 import utils.Maths;
 
 /**
@@ -21,6 +22,7 @@ public class StaticShader extends ShaderProgram {
     private int location_shineDamper;
     private int location_reflect;
     private int location_fakeLighting;
+    private int location_skyColour;
 
     public StaticShader() {
         super(VERTEX_FILE, FRAGMENT_FILE);
@@ -43,6 +45,11 @@ public class StaticShader extends ShaderProgram {
        location_shineDamper = super.getUniformLocation("shineDamper");
        location_reflect = super.getUniformLocation("reflectivity");
        location_fakeLighting = super.getUniformLocation("useFakeLighting");
+       location_skyColour = super.getUniformLocation("skyColour");
+    }
+
+    public void loadSkyColour(Vector3f value) {
+        super.loadVector(location_skyColour, value);
     }
 
     public void loadFakeLighting(boolean value) {
