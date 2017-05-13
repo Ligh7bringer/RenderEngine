@@ -1,6 +1,7 @@
 package renderEngine;
 
 import models.RawModel;
+import objConverter.ModelData;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL15;
@@ -23,6 +24,10 @@ public class Loader {
     private List<Integer> vaos = new ArrayList<>();
     private List<Integer> vbos = new ArrayList<>();
     private List<Integer> textures = new ArrayList<>();
+
+    public RawModel loadToVao(ModelData data) {
+        return loadToVao(data.getVertices(), data.getTextureCoords(), data.getNormals(), data.getIndices());
+    }
 
     public RawModel loadToVao(float[] positions, float[] texCoords, float[] normals, int[] indices) {
         int vaoID = createVAO();

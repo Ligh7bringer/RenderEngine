@@ -16,7 +16,7 @@ uniform mat4 viewMatrix;
 uniform vec3 lightPos;
 
 const float DENSITY = 0.0035;
-const float GRADIENT = 5.0; 
+const float GRADIENT = 5.0;
 
 void main(void) {
 

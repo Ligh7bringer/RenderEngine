@@ -14,6 +14,7 @@ import java.util.List;
 
 /**
  * Created by sgeor on 12/05/2017.
+ * THIS IS NOW OBSOLETE!
  */
 public class OBJLoader {
     public static RawModel loadObjModel(String fileName, Loader loader) {
