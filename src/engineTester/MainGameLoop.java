@@ -15,6 +15,8 @@ import models.RawModel;
 import shaders.StaticShader;
 import terrains.Terrain;
 import textures.ModelTexture;
+import textures.TerrainTexture;
+import textures.TerrainTexturePack;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,7 +32,18 @@ public class MainGameLoop {
 
         Loader loader = new Loader();
         Light light = new Light(new Vector3f(3000,2000,2000), new Vector3f(1,1,1));
-        Terrain terrain = new Terrain(-0.5f, -1, loader, new ModelTexture(loader.loadTexture("grass")));
+
+        //terrain stuff
+        TerrainTexture bg = new TerrainTexture(loader.loadTexture("grassy2"));
+        TerrainTexture r = new TerrainTexture(loader.loadTexture("mud"));
+        TerrainTexture g = new TerrainTexture(loader.loadTexture("grassFlowers"));
+        TerrainTexture b = new TerrainTexture(loader.loadTexture("path"));
+        TerrainTexture blendMap = new TerrainTexture(loader.loadTexture("blendMap"));
+
+        TerrainTexturePack texturePack = new TerrainTexturePack(bg, r, g, b);
+
+        Terrain terrain = new Terrain(0, -1, loader, texturePack, blendMap);
+        Terrain terrain2 = new Terrain(-1, -1, loader, texturePack, blendMap);
 
         List<Entity> trees = new ArrayList<>();
         List<Entity> trees2 = new ArrayList<>();
@@ -99,6 +112,7 @@ public class MainGameLoop {
         while(!Display.isCloseRequested()) {
             camera.move();
             renderer.processTerrain(terrain);
+            renderer.processTerrain(terrain2);
             for(Entity e : trees)
                 renderer.processEntity(e);
             for(Entity e : grass)
