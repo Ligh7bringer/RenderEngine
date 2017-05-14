@@ -90,12 +90,13 @@ public class MainGameLoop {
         TexturedModel fernModel = new TexturedModel(rawFernModel, new ModelTexture(loader.loadTexture("fern")));
         fernModel.getTexture().hasTransparency(true);
         fernModel.getTexture().useFakeLighting(true);
+        fernModel.getTexture().setNumOfRows(2);
 
         for(int i = 0; i < 200; i++) {
             float x = random.nextFloat() * 500;
             float z = random.nextFloat() * -500;
             float y = terrain.getHeightOfTerrain(x, z);
-            fern.add(new Entity(fernModel, new Vector3f(x, y, z), 0, random.nextFloat() * 180f, 0f,
+            fern.add(new Entity(fernModel, random.nextInt(4), new Vector3f(x, y, z), 0, random.nextFloat() * 180f, 0f,
                     1f));
         }
 
