@@ -52,7 +52,6 @@ public class MainGameLoop {
         TerrainTexturePack texturePack = new TerrainTexturePack(bg, r, g, b);
 
         Terrain terrain = new Terrain(0, -1, loader, texturePack, blendMap, "heightmap");
-        Terrain terrain2 = new Terrain(-1, -1, loader, texturePack, blendMap, "heightmap");
 
         List<Entity> trees = new ArrayList<>();
         List<Entity> trees2 = new ArrayList<>();
@@ -67,8 +66,8 @@ public class MainGameLoop {
 
         for(int i = 0; i < 100; i++) {
             float x = random.nextFloat() * 500;
-            float y = 0f;
             float z = random.nextFloat() * -500;
+            float y = terrain.getHeightOfTerrain(x, z);
             trees.add(new Entity(treeModel, new Vector3f(x, y, z), 0, random.nextFloat() * 180f, 0f,
                     0.7f));
         }
@@ -79,25 +78,10 @@ public class MainGameLoop {
 
         for(int i = 0; i < 100; i++) {
             float x = random.nextFloat() * 500;
-            float y = 0f;
             float z = random.nextFloat() * -500;
+            float y = terrain.getHeightOfTerrain(x, z);
             trees2.add(new Entity(treeModel2, new Vector3f(x, y, z), 0, random.nextFloat() * 180f, 0f,
                     5f));
-        }
-
-        //grass
-        ModelData grassData = OBJFileLoader.loadOBJ("grassModel");
-        RawModel rawGrassModel = loader.loadToVao(grassData);
-        TexturedModel grassModel = new TexturedModel(rawGrassModel, new ModelTexture(loader.loadTexture("grassTex")));
-        grassModel.getTexture().hasTransparency(true);
-        grassModel.getTexture().useFakeLighting(true);
-
-        for(int i = 0; i < 200; i++) {
-            float x = random.nextFloat() * 500;
-            float y = 0f;
-            float z = random.nextFloat() * -500;
-            grass.add(new Entity(grassModel, new Vector3f(x, y, z), 0, random.nextFloat() * 180f, 0f,
-                    1.4f));
         }
 
         //fern
@@ -109,8 +93,8 @@ public class MainGameLoop {
 
         for(int i = 0; i < 200; i++) {
             float x = random.nextFloat() * 500;
-            float y = 0f;
             float z = random.nextFloat() * -500;
+            float y = terrain.getHeightOfTerrain(x, z);
             fern.add(new Entity(fernModel, new Vector3f(x, y, z), 0, random.nextFloat() * 180f, 0f,
                     1f));
         }
@@ -122,8 +106,7 @@ public class MainGameLoop {
         while(!Display.isCloseRequested()) {
             camera.move();
             renderer.processTerrain(terrain);
-            renderer.processTerrain(terrain2);
-            player.move();
+            player.move(terrain);
             renderer.processEntity(player);
             for(Entity e : trees)
                 renderer.processEntity(e);

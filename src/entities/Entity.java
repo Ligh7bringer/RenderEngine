@@ -2,6 +2,7 @@ package entities;
 
 import models.TexturedModel;
 import org.lwjgl.util.vector.Vector3f;
+import terrains.Terrain;
 
 /**
  * Created by sgeor on 11/05/2017.
