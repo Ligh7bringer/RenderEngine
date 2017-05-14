@@ -3,6 +3,7 @@ package renderEngine;
 import entities.Camera;
 import entities.Entity;
 import models.TexturedModel;
+import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Matrix4f;
@@ -12,6 +13,7 @@ import entities.Light;
 import shaders.TerrainShader;
 import terrains.Terrain;
 
+import java.security.Key;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -41,6 +43,8 @@ public class MasterRenderer {
     private Map<TexturedModel, List<Entity>> entities = new HashMap<>();
     private List<Terrain> terrains = new ArrayList<>();
 
+    private boolean polygonMode = false;
+
     public MasterRenderer() {
         enableCulling();
         createProjectionMatrix();
@@ -59,6 +63,13 @@ public class MasterRenderer {
 
     public void render(Light light, Camera camera) {
         prepare();
+        if(Keyboard.isKeyDown(Keyboard.KEY_P)) {
+            polygonMode = !polygonMode;
+        }
+        if(polygonMode)
+            GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_LINE);
+        else
+            GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_FILL);
         shader.start();
         shader.loadSkyColour(new Vector3f(RED, GREEN, BLUE));
         shader.loadLight(light);
