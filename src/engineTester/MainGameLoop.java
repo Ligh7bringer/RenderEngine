@@ -51,8 +51,8 @@ public class MainGameLoop {
 
         TerrainTexturePack texturePack = new TerrainTexturePack(bg, r, g, b);
 
-        Terrain terrain = new Terrain(0, -1, loader, texturePack, blendMap);
-        Terrain terrain2 = new Terrain(-1, -1, loader, texturePack, blendMap);
+        Terrain terrain = new Terrain(0, -1, loader, texturePack, blendMap, "heightmap");
+        Terrain terrain2 = new Terrain(-1, -1, loader, texturePack, blendMap, "heightmap");
 
         List<Entity> trees = new ArrayList<>();
         List<Entity> trees2 = new ArrayList<>();
