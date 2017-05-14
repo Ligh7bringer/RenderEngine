@@ -3,6 +3,7 @@ package engineTester;
 import entities.Camera;
 import entities.Entity;
 import entities.Light;
+import entities.Player;
 import models.TexturedModel;
 import objConverter.ModelData;
 import objConverter.OBJFileLoader;
@@ -33,6 +34,14 @@ public class MainGameLoop {
         Loader loader = new Loader();
         Light light = new Light(new Vector3f(3000,2000,2000), new Vector3f(1,1,1));
 
+        //player
+        ModelData data = OBJFileLoader.loadOBJ("person");
+        RawModel playerModel = loader.loadToVao(data);
+        ModelTexture playerTex = new ModelTexture(loader.loadTexture("playerTexture"));
+        TexturedModel playerTexModel = new TexturedModel(playerModel, playerTex);
+
+        Player player = new Player(playerTexModel, new Vector3f(100, 0, -50), 0, 0,0, 0.7f);
+
         //terrain stuff
         TerrainTexture bg = new TerrainTexture(loader.loadTexture("grassy2"));
         TerrainTexture r = new TerrainTexture(loader.loadTexture("mud"));
@@ -61,7 +70,7 @@ public class MainGameLoop {
             float y = 0f;
             float z = random.nextFloat() * -500;
             trees.add(new Entity(treeModel, new Vector3f(x, y, z), 0, random.nextFloat() * 180f, 0f,
-                    1.5f));
+                    0.7f));
         }
 
         ModelData treeData2 = OBJFileLoader.loadOBJ("tree");
@@ -88,7 +97,7 @@ public class MainGameLoop {
             float y = 0f;
             float z = random.nextFloat() * -500;
             grass.add(new Entity(grassModel, new Vector3f(x, y, z), 0, random.nextFloat() * 180f, 0f,
-                    1f));
+                    1.4f));
         }
 
         //fern
@@ -107,12 +116,15 @@ public class MainGameLoop {
         }
 
 
-        Camera camera = new Camera();        MasterRenderer renderer = new MasterRenderer();
+        Camera camera = new Camera(player);
+        MasterRenderer renderer = new MasterRenderer();
 
         while(!Display.isCloseRequested()) {
             camera.move();
             renderer.processTerrain(terrain);
             renderer.processTerrain(terrain2);
+            player.move();
+            renderer.processEntity(player);
             for(Entity e : trees)
                 renderer.processEntity(e);
             for(Entity e : grass)
