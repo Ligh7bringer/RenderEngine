@@ -2,14 +2,15 @@
 
 in vec2 pass_texCoords;
 in vec3 surfaceNormal;
-in vec3 toLight;
+in vec3 toLight[4];
 in vec3 toCamera;
 in float visibility;
 
 out vec4 out_colour;
 
 uniform sampler2D textureSampler;
-uniform vec3 lightColour;
+uniform vec3 lightColour[4];
+uniform vec3 attenuation[4];
 uniform float shineDamper;
 uniform float reflectivity;
 uniform vec3 skyColour;
@@ -17,26 +18,33 @@ uniform vec3 skyColour;
 void main(void) {
 
     vec3 unitNormal = normalize(surfaceNormal);
-    vec3 unitToLight = normalize(toLight);
-
-    float nDotl = dot(unitNormal, unitToLight);
-    float brightness = max(nDotl, 0.2);
-    vec3 diffuse = brightness * lightColour;
-
     vec3 unitToCam = normalize(toCamera);
-    vec3 lightDir = -unitToLight;
-    vec3 reflectedLightDir = reflect(lightDir, unitNormal);
 
-    float specularFactor = dot(reflectedLightDir, unitToCam);
-    specularFactor = max(specularFactor, 0.0);
-    float dampedFactor = pow(specularFactor, shineDamper);
-    vec3 finalSpecular = dampedFactor * reflectivity * lightColour ;
+    vec3 totalDiffuse = vec3(0, 0, 0);
+    vec3 totalSpecular = vec3(0, 0, 0);
+
+    for(int i = 0; i < 4; i++) {
+        float distance = length(toLight[i]);
+        float attFactor = attenuation[i].x + (attenuation[i].y * distance) + (attenuation[i].z * distance * distance);
+        vec3 unitToLight = normalize(toLight[i]);
+        float nDotl = dot(unitNormal, unitToLight);
+        float brightness = max(nDotl, 0.0);
+        vec3 lightDir = -unitToLight;
+        vec3 reflectedLightDir = reflect(lightDir, unitNormal);
+        float specularFactor = dot(reflectedLightDir, unitToCam);
+        specularFactor = max(specularFactor, 0.0);
+        float dampedFactor = pow(specularFactor, shineDamper);
+        totalDiffuse += totalDiffuse + (brightness * lightColour[i]) / attFactor;
+        totalSpecular += totalSpecular + (dampedFactor * reflectivity * lightColour[i]) / attFactor;
+    }
+
+    totalDiffuse = max(totalDiffuse, 0.2);
 
     vec4 texColour = texture(textureSampler, pass_texCoords);
     if(texColour.a < 0.5) {
         discard;
     }
 
-    out_colour = vec4(diffuse, 1.0) * texColour + vec4(finalSpecular, 1.0);
+    out_colour = vec4(totalDiffuse, 1.0) * texColour + vec4(totalSpecular, 1.0);
     out_colour = mix(vec4(skyColour, 1.0), out_colour, visibility);
 }

@@ -17,6 +17,7 @@ import org.newdawn.slick.opengl.Texture;
 import renderEngine.*;
 import models.RawModel;
 import shaders.StaticShader;
+import skybox.SkyboxRenderer;
 import terrains.Terrain;
 import textures.ModelTexture;
 import textures.TerrainTexture;
@@ -35,7 +36,13 @@ public class MainGameLoop {
         System.out.println("OpenGL version: " + GL11.glGetString(GL11.GL_VERSION));
 
         Loader loader = new Loader();
-        Light light = new Light(new Vector3f(3000,2000,2000), new Vector3f(1,1,1));
+
+        //lights
+        List<Light> lights = new ArrayList<>();
+        lights.add(new Light(new Vector3f(0,1000,-7000), new Vector3f(0.1f,0.1f,0.1f)));
+        lights.add(new Light(new Vector3f(185,10,-293), new Vector3f(1,0,0), new Vector3f(1f, 0.01f, 0.002f)));
+        lights.add(new Light(new Vector3f(370,17,-300), new Vector3f(0,1,0), new Vector3f(1f, 0.01f, 0.002f)));
+        lights.add(new Light(new Vector3f(293,7,-305), new Vector3f(1,1,0), new Vector3f(1f, 0.01f, 0.002f)));
 
         //guis
         List<GuiTexture> guis = new ArrayList<>();
@@ -48,10 +55,10 @@ public class MainGameLoop {
         ModelTexture playerTex = new ModelTexture(loader.loadTexture("playerTexture"));
         TexturedModel playerTexModel = new TexturedModel(playerModel, playerTex);
 
-        Player player = new Player(playerTexModel, new Vector3f(100, 0, -50), 0, 0,0, 0.7f);
+        Player player = new Player(playerTexModel, new Vector3f(0,0,0), 0, 150,0, 0.7f);
 
         //terrain stuff
-        TerrainTexture bg = new TerrainTexture(loader.loadTexture("grassy2"));
+        TerrainTexture bg = new TerrainTexture(loader.loadTexture("grass"));
         TerrainTexture r = new TerrainTexture(loader.loadTexture("mud"));
         TerrainTexture g = new TerrainTexture(loader.loadTexture("grassFlowers"));
         TerrainTexture b = new TerrainTexture(loader.loadTexture("path"));
@@ -72,7 +79,7 @@ public class MainGameLoop {
         RawModel rawTreeModel = loader.loadToVao(treeData);
         TexturedModel treeModel = new TexturedModel(rawTreeModel, new ModelTexture(loader.loadTexture("lowPolyTree")));
 
-        for(int i = 0; i < 100; i++) {
+        for(int i = 0; i < 50; i++) {
             float x = random.nextFloat() * 500;
             float z = random.nextFloat() * -500;
             float y = terrain.getHeightOfTerrain(x, z);
@@ -80,16 +87,16 @@ public class MainGameLoop {
                     0.7f));
         }
 
-        ModelData treeData2 = OBJFileLoader.loadOBJ("tree");
+        ModelData treeData2 = OBJFileLoader.loadOBJ("pine");
         RawModel rawTreeModel2 = loader.loadToVao(treeData2);
-        TexturedModel treeModel2 = new TexturedModel(rawTreeModel2, new ModelTexture(loader.loadTexture("tree")));
+        TexturedModel treeModel2 = new TexturedModel(rawTreeModel2, new ModelTexture(loader.loadTexture("pine")));
 
         for(int i = 0; i < 100; i++) {
             float x = random.nextFloat() * 500;
             float z = random.nextFloat() * -500;
             float y = terrain.getHeightOfTerrain(x, z);
             trees2.add(new Entity(treeModel2, new Vector3f(x, y, z), 0, random.nextFloat() * 180f, 0f,
-                    5f));
+                    1f));
         }
 
         //fern
@@ -108,9 +115,19 @@ public class MainGameLoop {
                     1f));
         }
 
+        //lamps
+        List<Entity> lamps = new ArrayList<>();
+        ModelData lampData = OBJFileLoader.loadOBJ("lamp");
+        RawModel rawLampModel = loader.loadToVao(lampData);
+        TexturedModel lampModel = new TexturedModel(rawLampModel, new ModelTexture(loader.loadTexture("lamp")));
+        lampModel.getTexture().useFakeLighting(true);
+
+        lamps.add(new Entity(lampModel, new Vector3f(185, -4.7f, -293), 0, 0, 0, 1));
+        lamps.add(new Entity(lampModel, new Vector3f(370, 4.2f, -300), 0, 0, 0, 1));
+        lamps.add(new Entity(lampModel, new Vector3f(293, -6.8f, -305), 0, 0, 0, 1));
 
         Camera camera = new Camera(player);
-        MasterRenderer renderer = new MasterRenderer();
+        MasterRenderer renderer = new MasterRenderer(loader);
         GuiRenderer guiRenderer = new GuiRenderer(loader);
 
         while(!Display.isCloseRequested()) {
@@ -126,7 +143,10 @@ public class MainGameLoop {
                 renderer.processEntity(e);
             for(Entity e : trees2)
                 renderer.processEntity(e);
-            renderer.render(light, camera);
+            for(Entity e : lamps)
+                renderer.processEntity(e);
+            renderer.render(lights, camera);
+
             guiRenderer.render(guis);
             DisplayManager.updateDisplay();
         }

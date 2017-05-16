@@ -11,6 +11,7 @@ import org.lwjgl.util.vector.Vector3f;
 import shaders.StaticShader;
 import entities.Light;
 import shaders.TerrainShader;
+import skybox.SkyboxRenderer;
 import terrains.Terrain;
 
 import java.security.Key;
@@ -28,9 +29,9 @@ public class MasterRenderer {
     private static final float NEAR_PLANE = 0.1f;
     private static final float FAR_PLANE = 1000;
 
-    private static final float RED = 0.5f;
-    private static final float GREEN = 0.5f;
-    private static final float BLUE = 0.5f;
+    private static final float RED = 0.5444f;
+    private static final float GREEN = 0.62f;
+    private static final float BLUE = 0.69f;
 
     private Matrix4f projMatrix;
 
@@ -45,11 +46,14 @@ public class MasterRenderer {
 
     private boolean polygonMode = false;
 
-    public MasterRenderer() {
+    private SkyboxRenderer skyboxRenderer;
+
+    public MasterRenderer(Loader loader) {
         enableCulling();
         createProjectionMatrix();
         renderer = new EntityRenderer(shader, projMatrix);
         terrainRenderer = new TerrainRenderer(terrainShader, projMatrix);
+        skyboxRenderer = new SkyboxRenderer(loader, projMatrix);
     }
 
     public static void enableCulling() {
@@ -61,27 +65,21 @@ public class MasterRenderer {
         GL11.glDisable(GL11.GL_CULL_FACE);
     }
 
-    public void render(Light light, Camera camera) {
+    public void render(List<Light> lights, Camera camera) {
         prepare();
-        if(Keyboard.isKeyDown(Keyboard.KEY_P)) {
-            polygonMode = !polygonMode;
-        }
-        if(polygonMode)
-            GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_LINE);
-        else
-            GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_FILL);
         shader.start();
         shader.loadSkyColour(new Vector3f(RED, GREEN, BLUE));
-        shader.loadLight(light);
+        shader.loadLights(lights);
         shader.loadViewMatrix(camera);
         renderer.render(entities);
         shader.stop();
         terrainShader.start();
         terrainShader.loadSkyColour(new Vector3f(RED, GREEN, BLUE));
-        terrainShader.loadLight(light);
+        terrainShader.loadLights(lights);
         terrainShader.loadViewMatrix(camera);
         terrainRenderer.render(terrains);
         terrainShader.stop();
+        skyboxRenderer.render(camera);
         terrains.clear();
         entities.clear();
     }

@@ -6,14 +6,14 @@ in vec3 normal;
 
 out vec2 pass_texCoords;
 out vec3 surfaceNormal;
-out vec3 toLight;
+out vec3 toLight[4];
 out vec3 toCamera;
 out float visibility;
 
 uniform mat4 transformationMatrix;
 uniform mat4 projectionMatrix;
 uniform mat4 viewMatrix;
-uniform vec3 lightPos;
+uniform vec3 lightPos[4];
 
 const float DENSITY = 0.0035;
 const float GRADIENT = 5.0;
@@ -26,7 +26,11 @@ void main(void) {
     pass_texCoords = texCoords;
 
     surfaceNormal = (transformationMatrix * vec4(normal, 0.0)).xyz;
-    toLight = lightPos - worldPos.xyz;
+
+    for(int i = 0; i < 4; i++) {
+        toLight[i] = lightPos[i] - worldPos.xyz;
+    }
+
     toCamera = (inverse(viewMatrix) * vec4(0.0, 0.0, 0.0, 1.0)).xyz - worldPos.xyz;
 
     float distance = length(posRelativeToCam.xyz);
