@@ -14,6 +14,7 @@ uniform mat4 transformationMatrix;
 uniform mat4 projectionMatrix;
 uniform mat4 viewMatrix;
 uniform vec3 lightPos[4];
+uniform vec4 clipPlane;
 
 const float DENSITY = 0.0035;
 const float GRADIENT = 5.0;
@@ -21,6 +22,9 @@ const float GRADIENT = 5.0;
 void main(void) {
 
     vec4 worldPos = transformationMatrix * vec4(position, 1.0);
+
+    gl_ClipDistance[0] = dot(worldPos, clipPlane);
+
     vec4 posRelativeToCam = viewMatrix * worldPos;
     gl_Position = projectionMatrix * posRelativeToCam;
     pass_texCoords = texCoords;

@@ -22,8 +22,8 @@ public class DisplayManager {
 
         try {
             Display.setDisplayMode(new DisplayMode(WIDTH, HEIGHT));
-            Display.create(new PixelFormat(), attribs);
-            Display.setTitle("GameEngine");
+            Display.create(new PixelFormat().withDepthBits(24), attribs);
+            Display.setTitle("Render Engine");
         } catch (LWJGLException e) {
             e.printStackTrace();
         }
@@ -38,7 +38,6 @@ public class DisplayManager {
         long currentFrameTime = getCurrentTime();
         deltaTime = (currentFrameTime - lastFrameTime) / 1000f;
         lastFrameTime = currentFrameTime;
-        //System.out.println("deltaTime=" + deltaTime);
     }
 
     public static float getDeltaTime() {

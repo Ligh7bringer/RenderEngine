@@ -6,6 +6,7 @@ import org.lwjgl.opengl.GL20;
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
+import org.lwjgl.util.vector.Vector4f;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -74,6 +75,10 @@ public abstract class ShaderProgram {
 
     protected void loadVector(int location, Vector3f value) {
         GL20.glUniform3f(location, value.x, value.y, value.z);
+    }
+
+    protected void loadVector4f(int location, Vector4f value) {
+        GL20.glUniform4f(location, value.x, value.y, value.z, value.w);
     }
 
     protected void loadVector2f(int location, Vector2f value) {

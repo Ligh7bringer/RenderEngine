@@ -17,13 +17,18 @@ uniform vec3 lightPos[4];
 uniform float useFakeLighting;
 uniform float numOfRows;
 uniform vec2 offset;
+uniform vec4 clipPlane;
 
 const float DENSITY = 0.0035;
 const float GRADIENT = 5.0;
 
+
 void main(void) {
 
     vec4 worldPos = transformationMatrix * vec4(position, 1.0);
+
+    gl_ClipDistance[0] = dot(worldPos, clipPlane);
+
     vec4 posRelativeToCam = viewMatrix * worldPos;
     gl_Position = projectionMatrix * posRelativeToCam;
     pass_texCoords = (texCoords/numOfRows) + offset;

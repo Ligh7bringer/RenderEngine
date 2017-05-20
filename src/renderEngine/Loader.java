@@ -39,6 +39,17 @@ public class Loader {
         return new RawModel(vaoID, indices.length);
     }
 
+    public RawModel loadToVao(float[] positions, float[] texCoords, float[] normals, float[] tangents, int[] indices) {
+        int vaoID = createVAO();
+        bindIndicesBuffer(indices);
+        storeDataInAttribList(0, 3, positions);
+        storeDataInAttribList(1, 2, texCoords);
+        storeDataInAttribList(2, 3, normals);
+        storeDataInAttribList(3, 3, tangents);
+        unbindVAO();
+        return new RawModel(vaoID, indices.length);
+    }
+
     public RawModel loadToVao(float[] positions, int dimensions) {
         int vaoID = createVAO();
         this.storeDataInAttribList(0, dimensions, positions);
@@ -125,7 +136,7 @@ public class Loader {
 
         for(int i = 0; i < textureFiles.length; i++) {
             TextureData data = decodeTextureFile("res/skybox/" + textureFiles[i] + ".png");
-            System.out.println("Skybox texture " + textureFiles[i] + ".png loaded!");
+            //System.out.println("Skybox texture " + textureFiles[i] + ".png loaded!");
             GL11.glTexImage2D(GL13.GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL11.GL_RGBA, data.getWidth(), data.getHeight(), 0,
                     GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, data.getBuffer());
 
