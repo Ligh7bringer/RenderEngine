@@ -4,12 +4,16 @@ import entities.Camera;
 import entities.Entity;
 import entities.Light;
 import entities.Player;
+import fontMeshCreator.FontType;
+import fontMeshCreator.GUIText;
+import fontRendering.TextMaster;
 import guis.GuiRenderer;
 import guis.GuiTexture;
 import models.TexturedModel;
 import normalMappingObjConverter.NormalMappedObjLoader;
 import objConverter.ModelData;
 import objConverter.OBJFileLoader;
+import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
@@ -18,6 +22,10 @@ import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 import org.lwjgl.util.vector.Vector4f;
 import org.newdawn.slick.opengl.Texture;
+import particles.Particle;
+import particles.ParticleMaster;
+import particles.ParticleSystem;
+import particles.ParticleTexture;
 import renderEngine.*;
 import models.RawModel;
 import shaders.StaticShader;
@@ -32,6 +40,7 @@ import water.WaterRenderer;
 import water.WaterShader;
 import water.WaterTile;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -45,14 +54,26 @@ public class MainGameLoop {
         System.out.println("OpenGL version: " + GL11.glGetString(GL11.GL_VERSION));
 
         Loader loader = new Loader();
+        TextMaster.init(loader);
         Random random = new Random();
+
+        MasterRenderer renderer = new MasterRenderer(loader);
+        GuiRenderer guiRenderer = new GuiRenderer(loader);
 
         List<Entity> entities = new ArrayList<>();
         List<Terrain> terrains = new ArrayList<>();
 
+        //particles
+        ParticleMaster.init(loader, renderer.getProjMatrix());
+
+        //text
+        FontType font = new FontType(loader.loadFont("candara"), new File("res/candara.fnt"));
+        GUIText text = new GUIText("A sample string of text!", 1, font, new Vector2f(0.0f, 0.0f), 1f, true);
+        text.setColour(0.1f, 0.1f, 0.1f);
+
         //lights
         List<Light> lights = new ArrayList<>();
-        Light sun = new Light(new Vector3f(1000,1000,1000), new Vector3f(0.5f,0.5f,0.5f));
+        Light sun = new Light(new Vector3f(1000,1000,1000), new Vector3f(0.1f,0.1f,0.1f));
         lights.add(sun);
         lights.add(new Light(new Vector3f(185,10,-293), new Vector3f(1,0,0), new Vector3f(1f, 0.01f, 0.002f)));
         lights.add(new Light(new Vector3f(370,17,-300), new Vector3f(0,1,0), new Vector3f(1f, 0.01f, 0.002f)));
@@ -142,8 +163,6 @@ public class MainGameLoop {
 
         //camera
         Camera camera = new Camera(player);
-        MasterRenderer renderer = new MasterRenderer(loader);
-        GuiRenderer guiRenderer = new GuiRenderer(loader);
 
         //water stuff
         WaterFrameBuffers fbos = new WaterFrameBuffers();
@@ -158,16 +177,31 @@ public class MainGameLoop {
 
         //normal map entities
         List<Entity> normalMapEntities = new ArrayList<>();
-        TexturedModel barrelModel = new TexturedModel(NormalMappedObjLoader.loadOBJ("barrel", loader), new ModelTexture(
-                loader.loadTexture("barrel")));
-        barrelModel.getTexture().setNormalMap(loader.loadTexture("barrelNormal"));
+        TexturedModel barrelModel = new TexturedModel(NormalMappedObjLoader.loadOBJ("crate", loader), new ModelTexture(
+                loader.loadTexture("crate")));
+        barrelModel.getTexture().setNormalMap(loader.loadTexture("crateNormal"));
         barrelModel.getTexture().setShineDamper(10);
         barrelModel.getTexture().setReflectivity(0.5f);
-        normalMapEntities.add(new Entity(barrelModel, new Vector3f(30, 10, -30), 0, 0, 0, 1f));
+        normalMapEntities.add(new Entity(barrelModel, new Vector3f(30, 10, -30), 0, 0, 0, 0.1f));
+
+        //particle system
+        ParticleTexture particleTexture = new ParticleTexture(loader.loadTexture("particleTex/cosmic"), 4);
+        particleTexture.setAdditive(true);
+
+        ParticleSystem particleSystem = new ParticleSystem(particleTexture, 100, 10, 0.1f, 1, 1.6f);
+        particleSystem.randomizeRotation();
+        particleSystem.setDirection(new Vector3f(0, 1, 0), 0.1f);
+        particleSystem.setLifeError(0.1f);
+        particleSystem.setSpeedError(0.25f);
+        particleSystem.setScaleError(0.5f);
 
         while(!Display.isCloseRequested()) {
             player.move(terrain);
             camera.move();
+
+            particleSystem.generateParticles(player.getPosition());
+
+            ParticleMaster.update(camera);
 
             GL11.glEnable(GL30.GL_CLIP_DISTANCE0);
 
@@ -190,10 +224,16 @@ public class MainGameLoop {
             renderer.renderScene(entities, normalMapEntities, terrains, lights, camera, new Vector4f(0, -1, 0, 100000));
             waterRenderer.render(waters, camera, sun);
 
+            ParticleMaster.renderParticles(camera);
+            TextMaster.render();
+
             //guiRenderer.render(guis);
             DisplayManager.updateDisplay();
         }
 
+
+        ParticleMaster.cleanUp();
+        TextMaster.cleanUp();
         fbos.cleanUp();
         waterShader.cleanUp();
         guiRenderer.cleanUp();
